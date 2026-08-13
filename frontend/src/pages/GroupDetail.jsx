@@ -206,16 +206,22 @@ export default function GroupDetail() {
           <div className="rounded-lg bg-slate-50 p-4 dark:bg-navy-800">
             <p className="text-sm text-slate-500 dark:text-slate-400">Invite Code</p>
             <div className="mt-1 flex items-center gap-2">
-              <code className="font-mono font-semibold">{group.inviteCode}</code>
-              <button
-                type="button"
-                onClick={copyInviteCode}
-                className="rounded p-1 text-slate-500 hover:bg-slate-200 dark:hover:bg-navy-700"
-                aria-label="Copy invite code"
-              >
-                <FiCopy className="h-4 w-4" />
-              </button>
-              {copied && <Badge color="emerald">Copied!</Badge>}
+              {isCreator ? (
+                <>
+                  <code className="font-mono font-semibold">{group.inviteCode}</code>
+                  <button
+                    type="button"
+                    onClick={copyInviteCode}
+                    className="rounded p-1 text-slate-500 hover:bg-slate-200 dark:hover:bg-navy-700"
+                    aria-label="Copy invite code"
+                  >
+                    <FiCopy className="h-4 w-4" />
+                  </button>
+                  {copied && <Badge color="emerald">Copied!</Badge>}
+                </>
+              ) : (
+                <p className="text-sm text-slate-500">Admin only</p>
+              )}
             </div>
           </div>
         </div>
