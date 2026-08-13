@@ -42,7 +42,7 @@ export default function CycleDetail() {
     fetchCycle();
   }, [cycleId]);
 
-  const isCreator = isGroupCreator(cycle?.group, user?._id);
+  const isCreator = getId(cycle?.createdBy) === getId(user?._id);
   const canContribute =
     cycle?.status === 'open' && !cycle?.myContribution;
   const canConfirmPayout =
