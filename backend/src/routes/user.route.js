@@ -1,26 +1,16 @@
 import { Router } from "express";
-
 import protect from "../middlewares/protect.js";
-
 import validate from "../middlewares/validate.js";
-
 import {
     getCurrentUser,
     updateCurrentUser,
     changePassword,
 } from "../controllers/user.controller.js";
-
 import { updateUserSchema } from "../validators/update-user.validator.js";
-
 import { changePasswordSchema } from "../validators/change-password.validator.js";
 
-const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| Current User
-|--------------------------------------------------------------------------
-*/
+const router = Router();
 
 router.get(
     "/me",
@@ -28,24 +18,12 @@ router.get(
     getCurrentUser
 );
 
-/*
-|--------------------------------------------------------------------------
-| Update Profile
-|--------------------------------------------------------------------------
-*/
-
 router.patch(
     "/me",
     protect,
     validate(updateUserSchema),
     updateCurrentUser
 );
-
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
 
 router.patch(
     "/me/password",

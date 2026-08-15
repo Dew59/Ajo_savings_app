@@ -194,10 +194,6 @@ export const confirmPayout = async (cycleId, userId) => {
             );
         }
 
-        /*
-         * Confirm payout
-         */
-
         cycle.status = "closed";
 
         cycle.payoutConfirmedAt =
@@ -209,23 +205,9 @@ export const confirmPayout = async (cycleId, userId) => {
         cycle.payoutAmount =
             cycle.totalContributed;
 
-        /*
-         * Mark recipient as having received
-         * their payout.
-         */
-
         recipient.hasReceivedPayout = true;
 
-        /*
-         * Advance payout order
-         */
-
         group.currentPayoutIndex += 1;
-
-        /*
-         * Check whether every member has
-         * now received their payout.
-         */
 
         if (
             group.currentPayoutIndex >=
@@ -234,11 +216,6 @@ export const confirmPayout = async (cycleId, userId) => {
             group.status = "completed";
         }
 
-        /*
-         * Save cycle and group inside
-         * the same transaction.
-         */
-
         await cycle.save({
             session,
         });
@@ -246,11 +223,6 @@ export const confirmPayout = async (cycleId, userId) => {
         await group.save({
             session,
         });
-
-        /*
-         * Create payout transaction using
-         * the SAME MongoDB session.
-         */
 
         await createTransaction({
             user: cycle.payoutRecipient,
@@ -264,11 +236,6 @@ export const confirmPayout = async (cycleId, userId) => {
         });
 
         await session.commitTransaction();
-
-        /*
-         * Return populated cycle AFTER
-         * transaction has successfully committed.
-         */
 
         return await populateContributionCycle(
             ContributionCycle.findById(

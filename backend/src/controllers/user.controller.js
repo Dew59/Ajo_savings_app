@@ -2,16 +2,9 @@ import {
     asyncHandler,
     sendResponse,
 } from "../utils/index.js";
-
 import HTTP_STATUS from "../constants/http-status.js";
-
 import * as userService from "../services/user.service.js";
 
-/*
-|--------------------------------------------------------------------------
-| Get Current User
-|--------------------------------------------------------------------------
-*/
 
 export const getCurrentUser = asyncHandler(
     async (req, res) => {
@@ -31,12 +24,6 @@ export const getCurrentUser = asyncHandler(
     }
 );
 
-/*
-|--------------------------------------------------------------------------
-| Update Current User
-|--------------------------------------------------------------------------
-*/
-
 export const updateCurrentUser =
     asyncHandler(async (req, res) => {
         const user =
@@ -54,12 +41,6 @@ export const updateCurrentUser =
             },
         });
     });
-
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
 
 export const changePassword =
     asyncHandler(async (req, res) => {

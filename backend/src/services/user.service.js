@@ -1,16 +1,8 @@
 import bcrypt from "bcryptjs";
-
 import User from "../models/user.model.js";
-
 import HTTP_STATUS from "../constants/http-status.js";
-
 import { AppError } from "../utils/index.js";
 
-/*
-|--------------------------------------------------------------------------
-| Get Current User
-|--------------------------------------------------------------------------
-*/
 
 export const getCurrentUser = async (userId) => {
     const user = await User.findById(userId);
@@ -24,12 +16,6 @@ export const getCurrentUser = async (userId) => {
 
     return user;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Update Current User
-|--------------------------------------------------------------------------
-*/
 
 export const updateCurrentUser = async (
     userId,
@@ -58,12 +44,6 @@ export const updateCurrentUser = async (
             HTTP_STATUS.BAD_REQUEST
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Check Email
-    |--------------------------------------------------------------------------
-    */
 
     if (updates.email) {
         const existingUser =
@@ -102,23 +82,11 @@ export const updateCurrentUser = async (
     return user;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
-
 export const changePassword = async (
     userId,
     currentPassword,
     newPassword
 ) => {
-    /*
-    |--------------------------------------------------------------------------
-    | Password has select: false in the model.
-    | Therefore we explicitly request it.
-    |--------------------------------------------------------------------------
-    */
 
     const user =
         await User.findById(userId)
@@ -130,12 +98,6 @@ export const changePassword = async (
             HTTP_STATUS.NOT_FOUND
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Current Password
-    |--------------------------------------------------------------------------
-    */
 
     const isPasswordCorrect =
         await bcrypt.compare(
@@ -150,12 +112,6 @@ export const changePassword = async (
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Prevent Same Password
-    |--------------------------------------------------------------------------
-    */
-
     const isSamePassword =
         await bcrypt.compare(
             newPassword,
@@ -168,16 +124,6 @@ export const changePassword = async (
             HTTP_STATUS.BAD_REQUEST
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Password
-    |--------------------------------------------------------------------------
-    |
-    | We assign the raw password here.
-    | Your User model pre-save hook will hash it.
-    |
-    */
 
     user.password = newPassword;
 

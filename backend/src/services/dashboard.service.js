@@ -124,10 +124,18 @@ export const getDashboard = async (userId) => {
     const totalContributions = totalContributionResult[0]?.total || 0;
 
     const filteredCurrentCycles = currentCycles.filter((cycle) =>
-        cycle.group.members.some(
-            (member) =>
-                member.user.equals(userId) &&
-                member.isActive
+        Boolean(
+            cycle.group &&
+                cycle.group.members &&
+                cycle.group.members.some((member) => {
+                    const userObj = member.user;
+                    const isSameUser =
+                        userObj && typeof userObj.equals === 'function'
+                            ? userObj.equals(userId)
+                            : String(userObj) === String(userId);
+
+                    return isSameUser && member.isActive;
+                })
         )
     );
 

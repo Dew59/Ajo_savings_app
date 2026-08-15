@@ -33,12 +33,6 @@ export const createContribution = async (
 
         session.startTransaction();
 
-        /*
-        |------------------------------------------------------------------
-        | Find Cycle
-        |------------------------------------------------------------------
-        */
-
         const cycle =
             await ContributionCycle.findById(
                 cycleId
@@ -51,24 +45,12 @@ export const createContribution = async (
             );
         }
 
-        /*
-        |------------------------------------------------------------------
-        | Check Cycle Status
-        |------------------------------------------------------------------
-        */
-
         if (cycle.status !== "open") {
             throw new AppError(
                 "This contribution cycle is no longer accepting contributions.",
                 HTTP_STATUS.BAD_REQUEST
             );
         }
-
-        /*
-        |------------------------------------------------------------------
-        | Find Group
-        |------------------------------------------------------------------
-        */
 
         const group =
             await Group.findById(
@@ -81,12 +63,6 @@ export const createContribution = async (
                 HTTP_STATUS.NOT_FOUND
             );
         }
-
-        /*
-        |------------------------------------------------------------------
-        | Check Active Membership
-        |------------------------------------------------------------------
-        */
 
         const member =
             findActiveMember(
@@ -101,12 +77,6 @@ export const createContribution = async (
             );
         }
 
-        /*
-        |------------------------------------------------------------------
-        | Validate Contribution Amount
-        |------------------------------------------------------------------
-        */
-
         if (
             amount !==
             group.contributionAmount
@@ -116,12 +86,6 @@ export const createContribution = async (
                 HTTP_STATUS.BAD_REQUEST
             );
         }
-
-        /*
-        |------------------------------------------------------------------
-        | Prevent Duplicate Contribution
-        |------------------------------------------------------------------
-        */
 
         const existingContribution =
             await Contribution.findOne({
@@ -135,12 +99,6 @@ export const createContribution = async (
                 HTTP_STATUS.BAD_REQUEST
             );
         }
-
-        /*
-        |------------------------------------------------------------------
-        | Create Contribution
-        |------------------------------------------------------------------
-        */
 
         const [contribution] =
             await Contribution.create(
@@ -158,12 +116,6 @@ export const createContribution = async (
                 }
             );
 
-        /*
-        |------------------------------------------------------------------
-        | Create Contribution Transaction
-        |------------------------------------------------------------------
-        */
-
         await createTransaction({
             user: userId,
             group: group._id,
@@ -178,22 +130,10 @@ export const createContribution = async (
             session,
         });
 
-        /*
-        |------------------------------------------------------------------
-        | Update Cycle Totals
-        |------------------------------------------------------------------
-        */
-
         cycle.totalContributed +=
             group.contributionAmount;
 
         cycle.contributorCount += 1;
-
-        /*
-        |------------------------------------------------------------------
-        | Check Whether All Members Have Contributed
-        |------------------------------------------------------------------
-        */
 
         if (
             cycle.contributorCount >=
@@ -203,29 +143,11 @@ export const createContribution = async (
                 "ready_for_payout";
         }
 
-        /*
-        |------------------------------------------------------------------
-        | Save Cycle
-        |------------------------------------------------------------------
-        */
-
         await cycle.save({
             session,
         });
 
-        /*
-        |------------------------------------------------------------------
-        | Commit Transaction
-        |------------------------------------------------------------------
-        */
-
         await session.commitTransaction();
-
-        /*
-        |------------------------------------------------------------------
-        | Return Populated Contribution
-        |------------------------------------------------------------------
-        */
 
         return await populateContribution(
             Contribution.findById(

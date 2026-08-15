@@ -33,17 +33,6 @@ app.use(API_ROUTES.USERS, userRoutes)
 app.use("/api/v1/", dashboardRoutes);
 app.use(API_ROUTES.HEALTH, healthRoutes);
 
-// app.get("api/v1/auth/me", protect, (req, res) => {
-//   return sendResponse({
-//     res,
-//     statusCode: HTTP_STATUS.OK,
-//     message: "Authenticated user retrieved successfully.",
-//     data: {
-//       user: req.user,
-//     },
-//   });
-// });
-
 app.use((req, res, next) => {
   next(
     new AppError(

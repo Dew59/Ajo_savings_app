@@ -48,8 +48,8 @@ export default function GroupDetail() {
   const [leaveReason, setLeaveReason] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const isCreator = isGroupCreator(group, user?._id);
-  const isMember = isActiveMember(group, user?._id);
+  const isCreator = String(getId(group?.createdBy)) === String(getId(user));
+  const isMember = isActiveMember(group, getId(user));
 
   const fetchGroup = async () => {
     setLoading(true);
@@ -57,14 +57,6 @@ export default function GroupDetail() {
     try {
       const { data } = await groupsApi.getById(groupId);
       setGroup(data.data.group);
-
-      if (isGroupCreator(data.data.group, user?._id)) {
-        const reqRes = await groupsApi.getLeaveRequests(groupId);
-        setLeaveRequests(reqRes.data.data.requests);
-      } else if (isActiveMember(data.data.group, user?._id)) {
-        const myReq = await groupsApi.getMyLeaveRequest(groupId);
-        setLeaveRequest(myReq.data.data.leaveRequest);
-      }
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -74,7 +66,32 @@ export default function GroupDetail() {
 
   useEffect(() => {
     fetchGroup();
-  }, [groupId, user?._id]);
+  }, [groupId]);
+
+  useEffect(() => {
+    if (!group || !user) return;
+
+    const loadRequests = async () => {
+      try {
+        const creatorMatch = String(getId(group.createdBy)) === String(getId(user));
+        console.debug('GroupDetail: loadRequests', { groupId, creatorMatch, groupCreatedBy: getId(group.createdBy), userId: getId(user) });
+        if (creatorMatch) {
+          const reqRes = await groupsApi.getLeaveRequests(groupId);
+          setLeaveRequests(reqRes.data.data.requests || []);
+          } else if (isActiveMember(group, getId(user))) {
+          const myReq = await groupsApi.getMyLeaveRequest(groupId);
+          setLeaveRequest(myReq.data.data.leaveRequest || null);
+        }
+      } catch (err) {
+        // Ignore individual request errors but surface if group fetch failed earlier
+        // Set empty states to avoid indefinite loading
+        setLeaveRequests([]);
+        setLeaveRequest(null);
+      }
+    };
+
+    loadRequests();
+  }, [group, user, groupId]);
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(group.inviteCode);
@@ -114,6 +131,11 @@ export default function GroupDetail() {
   const handleApproveLeave = async (requestId) => {
     setActionError('');
     setActionLoading(true);
+    if (getId(group?.createdBy) !== getId(user)) {
+      setActionError('Only the group creator can approve leave requests.');
+      setActionLoading(false);
+      return;
+    }
     try {
       await groupsApi.approveLeaveRequest(requestId);
       fetchGroup();
@@ -142,6 +164,10 @@ export default function GroupDetail() {
   if (!group) return null;
 
   const activeMembers = getActiveMembers(group);
+  // Normalize leaveRequests shape: API may return an object { requests: [...] } or an array
+  const pendingLeaveRequests = Array.isArray(leaveRequests)
+    ? leaveRequests
+    : (leaveRequests && leaveRequests.requests) || [];
 
   return (
     <div className="space-y-6">
@@ -285,30 +311,34 @@ export default function GroupDetail() {
         </div>
       </Card>
 
-      {isCreator && leaveRequests.length > 0 && (
+      {isCreator && (
         <Card>
           <CardHeader title="Pending Leave Requests" />
           <div className="space-y-3">
-            {leaveRequests.map((req) => (
-              <div
-                key={req._id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700"
-              >
-                <div>
-                  <p className="font-medium">{req.member?.name}</p>
-                  {req.reason && (
-                    <p className="mt-1 text-sm text-slate-500">{req.reason}</p>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => handleApproveLeave(req._id)}
-                  loading={actionLoading}
+            {pendingLeaveRequests.length > 0 ? (
+              pendingLeaveRequests.map((req) => (
+                <div
+                  key={req._id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700"
                 >
-                  Approve
-                </Button>
-              </div>
-            ))}
+                  <div>
+                    <p className="font-medium">{req.member?.name}</p>
+                    {req.reason && (
+                      <p className="mt-1 text-sm text-slate-500">{req.reason}</p>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleApproveLeave(req._id)}
+                    loading={actionLoading}
+                  >
+                    Approve
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-sm text-slate-500">No pending leave requests.</div>
+            )}
           </div>
         </Card>
       )}

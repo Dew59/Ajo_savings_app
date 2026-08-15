@@ -14,9 +14,6 @@ import {
 import * as authController from "../controllers/auth.controller.js";
 import protect from "../middlewares/protect.js";
 
-// import Email from "../utils/email.js";
-// import User from "../models/user.model.js";
-
 const router = Router();
 
 router.post(
@@ -45,22 +42,5 @@ router.post(
 );
 
 router.get("/me", protect, getCurrentUser);
-
-
-// router.get("/test-email", async (req, res) => {
-
-//   const user =
-//     await User.findOne();
-
-//   await new Email(
-//     user,
-//     "https://google.com"
-//   ).sendPasswordReset();
-
-//   res.json({
-//     success: true,
-//   });
-
-// });
 
 export default router;
