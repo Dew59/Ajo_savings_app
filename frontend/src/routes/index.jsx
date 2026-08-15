@@ -56,6 +56,10 @@ const router = createBrowserRouter([
     path: '*',
     element: <Navigate to="/dashboard" replace />,
   },
-]);
+],
+  {
+    basename: '/Ajo_savings_app',
+  }
+);
 
 export default router;
