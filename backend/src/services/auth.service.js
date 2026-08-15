@@ -74,7 +74,7 @@ export const forgotPassword = async (email) => {
     });
 
     const resetURL =
-        `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+        `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     try {
 
