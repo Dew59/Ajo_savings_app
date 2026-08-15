@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/ajo_savings_app/",
+  base: "/Ajo_savings_app/",
   server: {
     port: 5173,
   },
