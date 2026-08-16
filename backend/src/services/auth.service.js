@@ -85,6 +85,8 @@ export const forgotPassword = async (email) => {
 
     } catch (error) {
 
+        console.error("PASSWORD RESET EMAIL ERROR:", error);
+
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
 
